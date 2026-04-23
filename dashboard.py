@@ -196,44 +196,52 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-user_input = st.chat_input("Type your message...")
+#user_input = st.chat_input("Type your message...")
+col1, col2 = st.columns([6, 0.5])
+with col1:
+    user_input = st.text_area("", height=68, placeholder="Type your message...", label_visibility="collapsed")
+with col2:
+    st.write("")  # alignment
+    send = st.button("➤", key="send_btn", use_container_width=True)
 
-if user_input:
-    # Add user message
-    st.session_state.current_messages.append({"role": "user", "content": user_input})
-    
-    # Get response
-    with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("💭 Thinking..."):
-            try:
-                reply, tokens, cost = st.session_state.client.send_message(
-                    user_input,
-                    temperature=temperature,
-                    max_tokens=max_tokens
-                )
-                
-                st.markdown(reply, unsafe_allow_html=True)
-                st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
-                
-                # Add assistant message
-                st.session_state.current_messages.append({
-                    "role": "assistant",
-                    "content": reply,
-                    "tokens": tokens,
-                    "cost": cost
-                })
-                
-                # Update stats
-                st.session_state.total_tokens += tokens
-                st.session_state.total_cost += cost
-                
-                # Save chat automatically
-                st.session_state.chat_manager.save_current_chat(
-                    st.session_state.current_messages,
-                    st.session_state.client.system_prompt
-                )
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
-    
-    st.rerun()
+if send and user_input.strip():
+
+    if user_input:
+        # Add user message
+        st.session_state.current_messages.append({"role": "user", "content": user_input})
+        
+        # Get response
+        with st.chat_message("assistant", avatar="🤖"):
+            with st.spinner("💭 Thinking..."):
+                try:
+                    reply, tokens, cost = st.session_state.client.send_message(
+                        user_input,
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                    
+                    st.markdown(reply, unsafe_allow_html=True)
+                    st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
+                    
+                    # Add assistant message
+                    st.session_state.current_messages.append({
+                        "role": "assistant",
+                        "content": reply,
+                        "tokens": tokens,
+                        "cost": cost
+                    })
+                    
+                    # Update stats
+                    st.session_state.total_tokens += tokens
+                    st.session_state.total_cost += cost
+                    
+                    # Save chat automatically
+                    st.session_state.chat_manager.save_current_chat(
+                        st.session_state.current_messages,
+                        st.session_state.client.system_prompt
+                    )
+                    
+                except Exception as e:
+                    st.error(f"Error: {e}")
+        
+        st.rerun()
