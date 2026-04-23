@@ -201,7 +201,7 @@ with col1:
         height=100,
         key="input_area",
         label_visibility="collapsed",
-        placeholder="Type your message... (Shift+Enter for newline, Send button to submit)"
+        placeholder="Type your message..."
     )
 with col2:
     send_button = st.button("Send", use_container_width=True)
