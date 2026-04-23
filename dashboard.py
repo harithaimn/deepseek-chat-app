@@ -3,7 +3,8 @@ Streamlit Dashboard for DeepSeek
 """
 import streamlit as st
 from backend import DeepSeekClient, DEFAULT_SYSTEM_PROMPT
-from chat_manager import ChatManager
+#from chat_manager import ChatManager
+from s3_chat_manager import S3ChatManager
 
 # ========== PAGE CONFIG ==========
 st.set_page_config(
@@ -13,12 +14,33 @@ st.set_page_config(
 )
 
 
+# ========== PASSWORD PROTECTION ==========
+def check_password():
+    """Returns True if user is logged in"""
+    if st.session_state.get("authenticated", False):
+        return True
+    
+    password = st.text_input("Enter password to access:", type="password")
+    if st.button("Login"):
+        if password == st.secrets["PASSWORD"]:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Wrong password")
+    return False
+
+if not check_password():
+    st.stop()
+
+    
+
 # ========== INITIALIZE SESSION ==========
 if "client" not in st.session_state:
     st.session_state.client = DeepSeekClient()
     
 if "chat_manager" not in st.session_state:
-    st.session_state.chat_manager = ChatManager()
+    st.session_state.chat_manager = S3ChatManager(bucket_name=st.secrets["S3_BUCKET_NAME"])
+
     
 if "current_messages" not in st.session_state:
     st.session_state.current_messages = []
