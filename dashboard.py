@@ -194,46 +194,57 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-#user_input = st.chat_input("Type your message...")
-user_input = st.text_area("Type your message...", height=68, key="input", label_visibility="collapsed")
-send = st.button("Send", key="send_btn")
+col1, col2 = st.columns([6, 1])
+with col1:
+    user_input = st.text_area(
+        "Message",
+        height=100,
+        key="input_area",
+        label_visibility="collapsed",
+        placeholder="Type your message... (Shift+Enter for newline, Send button to submit)"
+    )
+with col2:
+    send_button = st.button("Send", use_container_width=True)
 
-if user_input:
-    # Add user message
-    st.session_state.current_messages.append({"role": "user", "content": user_input})
+if send_button and user_input.strip():
+    # Add user message and process as before
+
+    if user_input:
+        # Add user message
+        st.session_state.current_messages.append({"role": "user", "content": user_input})
+        
+        # Get response
+        with st.chat_message("assistant", avatar="🤖"):
+            with st.spinner("💭 Thinking..."):
+                try:
+                    reply, tokens, cost = st.session_state.client.send_message(
+                        user_input,
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                    
+                    st.markdown(reply, unsafe_allow_html=True)
+                    st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
+                    
+                    # Add assistant message
+                    st.session_state.current_messages.append({
+                        "role": "assistant",
+                        "content": reply,
+                        "tokens": tokens,
+                        "cost": cost
+                    })
+                    
+                    # Update stats
+                    st.session_state.total_tokens += tokens
+                    st.session_state.total_cost += cost
+                    
+                    # Save chat automatically
+                    st.session_state.chat_manager.save_current_chat(
+                        st.session_state.current_messages,
+                        st.session_state.client.system_prompt
+                    )
+                    
+                except Exception as e:
+                    st.error(f"Error: {e}")
     
-    # Get response
-    with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("💭 Thinking..."):
-            try:
-                reply, tokens, cost = st.session_state.client.send_message(
-                    user_input,
-                    temperature=temperature,
-                    max_tokens=max_tokens
-                )
-                
-                st.markdown(reply, unsafe_allow_html=True)
-                st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
-                
-                # Add assistant message
-                st.session_state.current_messages.append({
-                    "role": "assistant",
-                    "content": reply,
-                    "tokens": tokens,
-                    "cost": cost
-                })
-                
-                # Update stats
-                st.session_state.total_tokens += tokens
-                st.session_state.total_cost += cost
-                
-                # Save chat automatically
-                st.session_state.chat_manager.save_current_chat(
-                    st.session_state.current_messages,
-                    st.session_state.client.system_prompt
-                )
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
-    
-    st.rerun()
+        st.rerun()
