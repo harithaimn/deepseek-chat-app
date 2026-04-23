@@ -194,7 +194,7 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-col1, col2 = st.columns([4, 2])
+col1, col2 = st.columns([4, 4])
 with col1:
     user_input = st.text_area(
         "Message",
