@@ -2,6 +2,8 @@
 Streamlit Dashboard for DeepSeek
 """
 import streamlit as st
+# Mobile-friendly input with newline support
+from streamlit.components.v1 import html
 from backend import DeepSeekClient, DEFAULT_SYSTEM_PROMPT
 #from chat_manager import ChatManager
 from s3_chat_manager import S3ChatManager
@@ -194,57 +196,44 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-col1, col2 = st.columns([2, 5])
-with col1:
-    user_input = st.text_area(
-        "Message",
-        height=100,
-        key="input_area",
-        label_visibility="collapsed",
-        placeholder="Type your message..."
-    )
-with col2:
-    send_button = st.button("Send", key="send_btn", use_container_width=True)
+user_input = st.chat_input("Type your message...")
 
-if send_button and user_input.strip():
-    # Add user message and process as before
-
-    if user_input:
-        # Add user message
-        st.session_state.current_messages.append({"role": "user", "content": user_input})
-        
-        # Get response
-        with st.chat_message("assistant", avatar="🤖"):
-            with st.spinner("💭 Thinking..."):
-                try:
-                    reply, tokens, cost = st.session_state.client.send_message(
-                        user_input,
-                        temperature=temperature,
-                        max_tokens=max_tokens
-                    )
-                    
-                    st.markdown(reply, unsafe_allow_html=True)
-                    st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
-                    
-                    # Add assistant message
-                    st.session_state.current_messages.append({
-                        "role": "assistant",
-                        "content": reply,
-                        "tokens": tokens,
-                        "cost": cost
-                    })
-                    
-                    # Update stats
-                    st.session_state.total_tokens += tokens
-                    st.session_state.total_cost += cost
-                    
-                    # Save chat automatically
-                    st.session_state.chat_manager.save_current_chat(
-                        st.session_state.current_messages,
-                        st.session_state.client.system_prompt
-                    )
-                    
-                except Exception as e:
-                    st.error(f"Error: {e}")
+if user_input:
+    # Add user message
+    st.session_state.current_messages.append({"role": "user", "content": user_input})
     
-        st.rerun()
+    # Get response
+    with st.chat_message("assistant", avatar="🤖"):
+        with st.spinner("💭 Thinking..."):
+            try:
+                reply, tokens, cost = st.session_state.client.send_message(
+                    user_input,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                
+                st.markdown(reply, unsafe_allow_html=True)
+                st.caption(f"⚡ {tokens} tokens | 💰 ${cost:.6f}")
+                
+                # Add assistant message
+                st.session_state.current_messages.append({
+                    "role": "assistant",
+                    "content": reply,
+                    "tokens": tokens,
+                    "cost": cost
+                })
+                
+                # Update stats
+                st.session_state.total_tokens += tokens
+                st.session_state.total_cost += cost
+                
+                # Save chat automatically
+                st.session_state.chat_manager.save_current_chat(
+                    st.session_state.current_messages,
+                    st.session_state.client.system_prompt
+                )
+                
+            except Exception as e:
+                st.error(f"Error: {e}")
+    
+    st.rerun()
