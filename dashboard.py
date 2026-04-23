@@ -2,8 +2,6 @@
 Streamlit Dashboard for DeepSeek
 """
 import streamlit as st
-# Mobile-friendly input with newline support
-from streamlit.components.v1 import html
 from backend import DeepSeekClient, DEFAULT_SYSTEM_PROMPT
 #from chat_manager import ChatManager
 from s3_chat_manager import S3ChatManager
@@ -196,25 +194,11 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-# Mobile-friendly text area (allows newline with Enter, send with button)
-col1, col2 = st.columns([5, 1])
+#user_input = st.chat_input("Type your message...")
+user_input = st.text_area("Type your message...", height=68, key="input", label_visibility="collapsed")
+send = st.button("Send", key="send_btn")
 
-with col1:
-    user_input = st.text_area(
-        "",
-        key="msg_input",
-        height=80,
-        placeholder="Type your message... (use Enter for new line, then tap Send)",
-        label_visibility="collapsed"
-    )
-
-with col2:
-    send_btn = st.button("📤 Send", use_container_width=True)
-
-# Process when either:
-# 1. Send button is clicked AND there's text, OR
-# 2. Ctrl+Enter (or Cmd+Enter) is pressed (optional)
-if send_btn and user_input:
+if user_input:
     # Add user message
     st.session_state.current_messages.append({"role": "user", "content": user_input})
     
@@ -248,9 +232,6 @@ if send_btn and user_input:
                     st.session_state.current_messages,
                     st.session_state.client.system_prompt
                 )
-                
-                # Clear the input for next message
-                st.session_state.msg_input = ""
                 
             except Exception as e:
                 st.error(f"Error: {e}")
