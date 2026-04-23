@@ -194,17 +194,18 @@ for msg in st.session_state.current_messages:
 
 
 # ========== CHAT INPUT ==========
-col1, col2 = st.columns([4, 4])
+col1, col2 = st.columns([5, 1])
 with col1:
     user_input = st.text_area(
         "Message",
-        height=100,
+        height=68,
         key="input_area",
         label_visibility="collapsed",
         placeholder="Type your message..."
     )
 with col2:
-    send_button = st.button("Send", use_container_width=True)
+    st.write("")
+    send_button = st.button("Send", key="send_btn", use_container_width=True)
 
 if send_button and user_input.strip():
     # Add user message and process as before
