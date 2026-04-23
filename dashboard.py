@@ -6,23 +6,6 @@ from backend import DeepSeekClient, DEFAULT_SYSTEM_PROMPT
 #from chat_manager import ChatManager
 from s3_chat_manager import S3ChatManager
 
-
-st.markdown("""
-<style>
-    /* Only hide footer and deploy button */
-    footer {
-        display: none !important;
-    }
-    
-    .stAppDeployButton {
-        display: none !important;
-    }
-    
-    /* Sidebar toggle remains fully functional */
-</style>
-""", unsafe_allow_html=True)
-
-
 # ========== PAGE CONFIG ==========
 st.set_page_config(
     page_title="DeepSeek Chat",
