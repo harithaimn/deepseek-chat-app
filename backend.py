@@ -47,9 +47,17 @@ class DeepSeekClient:
         self.messages = [{"role": "system", "content": self.system_prompt}]
         
     def set_system_prompt(self, new_prompt):
-        """Update system prompt and reset conversation"""
+        # """Update system prompt and reset conversation"""
+        # self.system_prompt = new_prompt
+        # self.reset_conversation()
+        """Update system prompt WITHOUT resetting conversation"""
         self.system_prompt = new_prompt
-        self.reset_conversation()
+        # Update the first message in the list (system prompt)
+        if self.messages and self.messages[0]["role"] == "system":
+            self.messages[0]["content"] = new_prompt
+        else:
+            # Should not happen, but handle gracefully
+            self.messages.insert(0, {"role": "system", "content": new_prompt})
     
     def reset_conversation(self):
         """Clear conversation history (keeps system prompt)"""

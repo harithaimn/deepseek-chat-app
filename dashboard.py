@@ -17,22 +17,22 @@ st.set_page_config(
 
 
 # ========== PASSWORD PROTECTION ==========
-def check_password():
-    """Returns True if user is logged in"""
-    if st.session_state.get("authenticated", False):
-        return True
+# def check_password():
+#     """Returns True if user is logged in"""
+#     if st.session_state.get("authenticated", False):
+#         return True
     
-    password = st.text_input("Enter password to access:", type="password")
-    if st.button("Login"):
-        if password == st.secrets["PASSWORD"]:
-            st.session_state.authenticated = True
-            st.rerun()
-        else:
-            st.error("Wrong password")
-    return False
+#     password = st.text_input("Enter password to access:", type="password")
+#     if st.button("Login"):
+#         if password == st.secrets["PASSWORD"]:
+#             st.session_state.authenticated = True
+#             st.rerun()
+#         else:
+#             st.error("Wrong password")
+#     return False
 
-if not check_password():
-    st.stop()
+# if not check_password():
+#     st.stop()
 
     
 
@@ -98,7 +98,13 @@ with st.sidebar:
                 if chat_data:
                     st.session_state.current_messages = chat_data.get("messages", [])
                     if "system_prompt" in chat_data:
-                        st.session_state.client.set_system_prompt(chat_data["system_prompt"])
+                        #st.session_state.client.set_system_prompt(chat_data["system_prompt"])
+                        # Update without resetting
+                        st.session_state.client.system_prompt = chat_data["system_prompt"]
+                        if st.session_state.client.messages and st.session_state.client.messages[0]["role"] == "system":
+                            st.session_state.client.messages[0]["content"] = chat_data["system_prompt"]
+                        else:
+                            st.session_state.client.messages.insert(0, {"role": "system", "content": chat_data["system_prompt"]})
                     st.rerun()
         with col2:
             if st.button("✏️", key=f"rename_{chat['id']}", help="Rename"):
@@ -142,7 +148,19 @@ with st.sidebar:
         
         #if st.button("Apply System Prompt"):
         if st.button("Apply System Prompt", key="apply_system_prompt"):
-            st.session_state.client.set_system_prompt(system_prompt)
+            # st.session_state.client.set_system_prompt(system_prompt)
+            # # Save to current chat
+            # st.session_state.chat_manager.save_current_chat(
+            #     st.session_state.current_messages,
+            #     system_prompt
+            # )
+            # st.rerun()
+            # Update without resetting
+            st.session_state.client.system_prompt = system_prompt
+            if st.session_state.client.messages and st.session_state.client.messages[0]["role"] == "system":
+                st.session_state.client.messages[0]["content"] = system_prompt
+            else:
+                st.session_state.client.messages.insert(0, {"role": "system", "content": system_prompt})
             # Save to current chat
             st.session_state.chat_manager.save_current_chat(
                 st.session_state.current_messages,
